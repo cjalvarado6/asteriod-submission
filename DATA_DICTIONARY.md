@@ -61,7 +61,7 @@ Derived from ephemeris data and belt surveys.
 | `communication_delay` | One-way light-time communication delay in minutes. |
 | `orbital_stability_score` | Long-term orbital stability assessment (0=unstable, 1=highly stable). |
 | `conjunction_frequency` | Rate of close approaches with other bodies (scaled). |
-| `lucky_number` | Numerological favorability score (0-10) derived from orbital resonance patterns, per the Ceres Institute for Astroprospecting (2246). *Note: This methodology has not been validated across multiple market cycles.* |
+| `lucky_number` | Numerological favorability score (0-10) derived from orbital resonance patterns, per the Ceres Institute for Astroprospecting (2246). |
 
 ---
 
@@ -87,6 +87,7 @@ Compiled from prospecting missions. Survey methodology and timing vary.
 | `equipment_compatibility` | Compatibility score with standard mining equipment (0-1). Low compatibility can significantly impact operational recovery rates. |
 | `estimated_yield_tonnes` | Surveyor's estimate of extractable material in tonnes. |
 | `survey_anomaly_flag` | Binary flag. Set to 1 if the survey team flagged unusual readings. |
+| `dual_phase_extraction` | Binary flag. Set to 1 if the asteroid requires two-phase extraction due to mixed ore types (e.g., volatile-rich and refractory minerals together). |
 | `previous_claim_history` | Number of times this asteroid has been previously claimed and abandoned. |
 | `legal_encumbrance_score` | Degree of legal complications (0=clear, higher=more encumbered). |
 | `environmental_hazard_rating` | Environmental risk assessment (0=benign, 1=severe). |
