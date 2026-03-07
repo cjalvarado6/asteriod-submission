@@ -21,7 +21,6 @@ def price_asteroids(asteroids: list[dict], capital: float, round_info: dict) -> 
             - round_number: current round (1-indexed)
             - total_rounds: total rounds in this sector
             - sector_name: name of the current sector
-            - economic_cycle_phase: "bust", "normal", or "boom"
             - asteroids_this_round: number of asteroids this round
             - risk_free_rate: per-round interest rate on liquid capital
             - num_active_competitors: number of non-bankrupt competitors
@@ -33,6 +32,9 @@ def price_asteroids(asteroids: list[dict], capital: float, round_info: dict) -> 
                 Keys: rounds_completed, cumulative_asteroids_offered,
                       cumulative_asteroids_sold, cumulative_catastrophes,
                       avg_winning_bid_last5, your_total_wins, your_total_spending
+        
+        Note: Economic cycle is in each asteroid's features as economic_cycle_indicator
+              (0.7=bust, 1.0=normal, 1.4=boom), consistent for all asteroids in a round.
 
     Returns:
         List of bid amounts (same length as asteroids). Return 0 to pass on an asteroid.
@@ -60,7 +62,9 @@ Starting from round 2, `round_info` includes:
 
 ## Test Your Strategy
 
-Use the training data (`data/training.csv`) to develop and validate your model. The training data includes target variables not available during competition: `mineral_value`, `extraction_yield`, `extraction_delay`, and `recovered_value`.
+Use the training data (`data/training.csv`) to develop and validate your model. The training data includes target variables not available during competition: `mineral_value`, `extraction_yield`, `extraction_delay`, `catastrophe_type`, and `toxic_outgassing_impact`.
+
+**Important**: Rows with `catastrophe_type != "none"` or `toxic_outgassing_impact == 1` have zeroed `mineral_value` and `extraction_yield`. Filter these when training regression models.
 
 ```python
 import pandas as pd
@@ -68,7 +72,7 @@ import pandas as pd
 df = pd.read_csv("data/training.csv")
 
 # Build a batch of asteroid feature dicts (drop target columns)
-target_cols = ["mineral_value", "extraction_yield", "extraction_delay", "recovered_value"]
+target_cols = ["mineral_value", "extraction_yield", "extraction_delay", "catastrophe_type", "toxic_outgassing_impact"]
 batch = []
 for _, row in df.head(10).iterrows():
     features = row.drop(target_cols).to_dict()
@@ -80,7 +84,6 @@ bids = price_asteroids(batch, capital=10000.0, round_info={
     "round_number": 1,
     "total_rounds": 50,
     "sector_name": "Outer Rim",
-    "economic_cycle_phase": "bust",
     "asteroids_this_round": 10,
     "risk_free_rate": 0.002,
     "num_active_competitors": 5,
@@ -91,8 +94,8 @@ bids = price_asteroids(batch, capital=10000.0, round_info={
 })
 
 for i, bid in enumerate(bids):
-    recovered = df.iloc[i]["recovered_value"]
-    print(f"Asteroid {i}: bid={bid:.2f}, recovered_value={recovered:.2f}")
+    mineral_val = df.iloc[i]["mineral_value"]
+    print(f"Asteroid {i}: bid={bid:.2f}, mineral_value={mineral_val:.2f}")
 ```
 
 ## Rules

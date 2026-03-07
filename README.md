@@ -47,11 +47,10 @@ def price_asteroids(asteroids: list[dict], capital: float, round_info: dict) -> 
 
 The `round_info` dict contains:
 | Key | Description |
-|-----|-------------|
+|-----|-----------|
 | `round_number` | Current round (1-indexed) |
 | `total_rounds` | Total rounds in this sector |
 | `sector_name` | Name of the current sector |
-| `economic_cycle_phase` | `"bust"`, `"normal"`, or `"boom"` |
 | `asteroids_this_round` | Number of asteroids offered this round |
 | `risk_free_rate` | Per-round interest rate on liquid capital |
 | `num_active_competitors` | Number of non-bankrupt competitors |
@@ -59,6 +58,8 @@ The `round_info` dict contains:
 | `num_pending_extractions` | Number of extractions still in progress |
 | `previous_round` | List of per-asteroid results from last round (see below), or `None` for round 1 |
 | `market_history` | Cumulative market stats (see below), or `None` for round 1 |
+
+**Note**: The economic cycle (bust/normal/boom) is available via the `economic_cycle_indicator` feature in each asteroid's feature dict (0.7 = bust, 1.0 = normal, 1.4 = boom). This is consistent for all asteroids in a round.
 
 **Previous round results** (`previous_round`): A list with one entry per asteroid from the previous round:
 | Key | Description |
@@ -84,11 +85,11 @@ Each asteroid comes with a rich feature set covering geological properties, orbi
 
 ### Catastrophic Events
 A fraction of asteroids will trigger catastrophic events when mined. The rate is feature-driven — asteroids with low structural integrity, low density, high porosity, or high volatile content are significantly more dangerous:
-- **Void Rock**: Hollow shell. You lose your bid plus a cleanup penalty.
-- **Structural Collapse**: Drilling destabilizes the body. Bid lost plus penalty.
-- **Toxic Outgassing**: Releases toxic gases that damage all operations in the same geological cluster — yours and others'.
+- **Void Rock**: Hollow shell. Penalty: $50 + 0.5 × bid.
+- **Structural Collapse**: Drilling destabilizes the body. Penalty: $100 + 0.75 × bid.
+- **Toxic Outgassing**: Releases toxic gases. Penalty: $200 + 1.0 × bid, plus damages all operations in the same geological cluster — yours and others'.
 
-Winning multiple asteroids in the same cluster increases both the probability of catastrophe and your exposure to cascade events.
+The training data includes a `catastrophe_type` target column so you can learn catastrophe probabilities from features. Winning multiple asteroids in the same cluster increases both the probability of catastrophe and your exposure to cascade events.
 
 ### Extraction Operations
 - **Extraction yield**: Not all mineral value is recovered during operations. Operational conditions — equipment compatibility, survey data quality, surface environment — all affect recovery rates. Your revenue from an asteroid is `mineral_value × extraction_yield`. The training data includes `extraction_yield` for each asteroid so you can learn what drives it.
@@ -118,7 +119,9 @@ Each sector resets capital. Economic conditions change between sectors.
 - `strategies/example_strategy.py` — a simple baseline bidder to study
 
 ### Build Your Model
-Load the training data and explore. The training data includes target variables not available during competition: `mineral_value` (what's in the rock), `extraction_yield` (recovery fraction), `extraction_delay` (rounds until revenue), and `recovered_value` (what the winner actually receives: `mineral_value × extraction_yield`). Your goal is to estimate what asteroids are worth and how long extraction will take, then bid profitably.
+Load the training data and explore. The training data includes target variables not available during competition: `mineral_value` (what's in the rock), `extraction_yield` (recovery fraction), `extraction_delay` (rounds until revenue), `catastrophe_type` (multiclass: none/void_rock/structural_collapse/toxic_outgassing), and `toxic_outgassing_impact` (whether this asteroid was damaged by another's outgassing).
+
+**Important**: Rows with catastrophes or toxic outgassing impacts have zeroed `mineral_value` and `extraction_yield`. Filter these rows when training regression models. Use the `catastrophe_type` column to learn catastrophe probabilities.
 
 ```python
 import pandas as pd

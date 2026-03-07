@@ -152,10 +152,27 @@ Available in training data only. Not available during competition.
 
 | Feature | Description |
 |---------|-------------|
-| `mineral_value` | The total mineral content value of the asteroid — what's in the rock before extraction operations. This is the theoretical ceiling. |
-| `extraction_yield` | Operational recovery factor (0-1+). What fraction of the mineral value is actually recovered during extraction. Depends on operational conditions — equipment fit, survey quality, surface environment, and gravity. Values above 1.0 indicate better-than-expected recovery. |
+| `mineral_value` | The total mineral content value of the asteroid — what's in the rock before extraction operations. This is the theoretical ceiling. **Set to 0 for catastrophe or impacted rows.** |
+| `extraction_yield` | Operational recovery factor (0-1+). What fraction of the mineral value is actually recovered during extraction. Depends on operational conditions — equipment fit, survey quality, surface environment, and gravity. Values above 1.0 indicate better-than-expected recovery. **Set to 0 for catastrophe or impacted rows.** |
 | `extraction_delay` | Extraction timeline in rounds. How many rounds until extraction revenue arrives after winning. Varies by asteroid characteristics — difficulty, belt region, accessibility, and mass all affect how long operations take. |
-| `recovered_value` | The actual revenue received after extraction: `mineral_value × extraction_yield`. This is what the winner takes home (before subtracting their bid). Negative values indicate a net loss. |
+| `catastrophe_type` | Multiclass categorical indicating catastrophe outcome: `"none"`, `"void_rock"`, `"structural_collapse"`, or `"toxic_outgassing"`. Use this to learn catastrophe probabilities from features. |
+| `toxic_outgassing_impact` | Binary (0 or 1). Set to 1 if this asteroid was impacted by toxic outgassing from another asteroid in the same cluster. These rows have zeroed `mineral_value` and `extraction_yield` — filter them when training regression models. |
+
+**Important**: Rows with `catastrophe_type != "none"` or `toxic_outgassing_impact == 1` have zeroed regression targets. When training models for `mineral_value` or `extraction_yield`, filter these rows. The catastrophe and impact columns allow you to learn the probability of these events from features.
+
+---
+
+## Catastrophe Penalties
+
+When a catastrophe occurs, you lose your bid plus a penalty. Penalties are **constant** per catastrophe type:
+
+| Catastrophe Type | Penalty Formula |
+|------------------|----------------|
+| **Void Rock** | $50 + 0.5 × bid |
+| **Structural Collapse** | $100 + 0.75 × bid |
+| **Toxic Outgassing** | $200 + 1.0 × bid |
+
+Toxic outgassing additionally damages all operations in the same geological cluster (yours and competitors').
 
 ---
 
@@ -165,3 +182,4 @@ Available in training data only. Not available during competition.
 - Market conditions in the training data reflect one economic period. Competition sectors may differ.
 - Some features are derived from or correlated with others.
 - Asteroid valuation involves interacting factors. Simple univariate relationships may not capture the full picture.
+- The `economic_cycle_indicator` feature is consistent for all asteroids in a given round and reflects the current market regime (0.7 = bust, 1.0 = normal, 1.4 = boom).
