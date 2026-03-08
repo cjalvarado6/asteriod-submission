@@ -85,47 +85,16 @@ Each asteroid comes with a rich feature set covering geological properties, orbi
 
 ### Catastrophic Events
 A fraction of asteroids will trigger catastrophic events when mined. The rate is feature-driven — asteroids with low structural integrity, low density, high porosity, or high volatile content are significantly more dangerous:
-- **Void Rock**: Hollow shell. Penalty: $50 + 0.5 × bid.
-- **Structural Collapse**: Drilling destabilizes the body. Penalty: $100 + 0.75 × bid.
-- **Toxic Outgassing**: Releases toxic gases. Penalty: $200 + 1.0 × bid, plus damages all operations in the same geological cluster — yours and others'.
-
-The training data includes a `catastrophe_type` target column so you can learn catastrophe probabilities from features. Winning multiple asteroids in the same cluster increases both the probability of catastrophe and your exposure to cascade events.
+- **Void Rock**: Hollow shell. Penalty: $100.
+- **Structural Collapse**: Drilling destabilizes the body. Penalty: $200.
+- **Toxic Outgassing**: Releases toxic gases. Penalty: $300 + $10 per other asteroid in the same cluster. Toxic outgassing in one asteroid ruins operations for all asteroids in the same cluster, preventing extraction.
 
 ### Extraction Operations
-- **Extraction yield**: Not all mineral value is recovered during operations. Operational conditions — equipment compatibility, survey data quality, surface environment — all affect recovery rates. Your revenue from an asteroid is `mineral_value × extraction_yield`. The training data includes `extraction_yield` for each asteroid so you can learn what drives it.
-- **Extraction delay**: When you win, your bid is paid immediately. Revenue arrives after a variable delay that depends on the asteroid's characteristics (difficulty, location, accessibility, size). The training data includes `extraction_delay` for each asteroid.
+- **Extraction yield**: Not all mineral value is recovered during operations. Operational conditions — equipment compatibility, survey data quality, surface environment — all affect recovery rates. Your revenue from an asteroid is `mineral_value × extraction_yield`.
+- **Extraction delay**: When you win, your bid is paid immediately. Revenue arrives after a variable delay that depends on the asteroid's characteristics (difficulty, location, accessibility, size).
 - **Interest**: Liquid capital earns a per-round return (given in `round_info`).
 - **Bankruptcy**: If your capital hits zero, you're eliminated. No coming back.
 
-### Tournament Structure
-
-The competition runs in two phases:
-
-**1. Preliminary Rounds**
-- Teams are randomly assigned to groups of 5
-- Each team participates in multiple different groups
-- Groups play in Outer Rim (bust) or Inner Belt (normal) sectors
-- Your score is your average final capital across all appearances
-- Top 8 teams advance to finals
-
-**2. Finals**
-- All 8 finalists compete together
-- Finals run 5 times across different sectors (boom-heavy)
-- Winner determined by average capital across all runs
-
-| Sector | Capital | Market | Risk-Free Rate |
-|--------|---------|--------|----------------|
-| **Outer Rim** | $10,000 | Bust (0.7×) | ~0.2%/round |
-| **Inner Belt** | $8,000 | Normal (1.0×) | ~0.3%/round |
-| **Core Belt** | $6,000 | Boom (1.4×) | ~0.4%/round |
-
-### How You Win
-
-Your preliminary ranking is based on **average performance across many different opponent combinations**. This rewards consistent strategies over lucky matchups.
-
-In the finals, the **8 best teams** compete head-to-head across multiple runs. The winner is determined by **average final capital** — not a single elimination bracket. Asteroids won in later rounds still count; revenue is collected at sector end.
-
----
 
 ## Getting Started
 
@@ -137,7 +106,7 @@ In the finals, the **8 best teams** compete head-to-head across multiple runs. T
 ### Build Your Model
 Load the training data and explore. The training data includes target variables not available during competition: `mineral_value` (what's in the rock), `extraction_yield` (recovery fraction), `extraction_delay` (rounds until revenue), `catastrophe_type` (multiclass: none/void_rock/structural_collapse/toxic_outgassing), and `toxic_outgassing_impact` (whether this asteroid was damaged by another's outgassing).
 
-**Important**: Rows with catastrophes or toxic outgassing impacts have zeroed `mineral_value` and `extraction_yield`. Filter these rows when training regression models. Use the `catastrophe_type` column to learn catastrophe probabilities.
+**Important**: Rows with catastrophes or toxic outgassing impacts have zeroed `mineral_value` and `extraction_yield`.
 
 ```python
 import pandas as pd

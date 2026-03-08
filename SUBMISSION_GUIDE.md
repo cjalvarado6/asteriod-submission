@@ -118,7 +118,7 @@ Starting from round 2, `round_info` includes:
 
 Use the training data (`data/training.parquet`) to develop and validate your model. The training data includes target variables not available during competition: `mineral_value`, `extraction_yield`, `extraction_delay`, `catastrophe_type`, and `toxic_outgassing_impact`.
 
-**Important**: Rows with `catastrophe_type != "none"` or `toxic_outgassing_impact == 1` have zeroed `mineral_value` and `extraction_yield`. Filter these when training regression models.
+**Important**: Rows with `catastrophe_type != "none"` or `toxic_outgassing_impact == 1` have zeroed `mineral_value` and `extraction_yield`.
 
 ```python
 import pandas as pd
@@ -206,7 +206,7 @@ def price_asteroids(asteroids, capital, round_info):
 
 1. **One strategy file + one optional model file.** Your submission directory contains `strategy.py` and optionally one model file.
 2. **No network access.** Strategies run in an isolated sandbox with no internet.
-3. **5-second timeout.** Your function must return within 5 seconds per round.
+3. **2-second timeout.** Your function must return within 2 seconds per round.
 4. **No arbitrary filesystem access.** You can only read your own model file.
 5. **Allowed packages:** numpy, pandas, scikit-learn, xgboost, lightgbm, statsmodels, torch (CPU), joblib. Other imports may fail.
 
@@ -229,31 +229,17 @@ The competition runs in two phases:
 ### 1. Preliminary Rounds
 
 - All teams are randomly assigned to **groups of 5**
-- Each team participates in **multiple different groups** (typically 10)
-- Each group plays through one randomly selected sector (Outer Rim, Inner Belt, or Core Belt)
+- Each team participates in **multiple different groups**
+- Each group plays through one selected sector (Outer Rim, Inner Belt, or Core Belt)
 - Your score is your **average final capital** across all group appearances
-- The **top 8 teams** by average score advance to the finals
+- The **top teams** by average score advance to the finals
 
 ### 2. Finals
 
-- All 8 finalists compete together
-- The finals are run **5 times** across different sectors
-- Your final score is your **average capital** across all 5 runs
+- All finalists compete together
+- The finals are run multiple times across different sectors
+- Your final score is your **average capital** across all runs
 - The team with the highest average wins
-
-### Sectors
-
-| Sector | Economic Phase | Starting Capital | Risk-Free Rate |
-|--------|---------------|------------------|----------------|
-| Outer Rim | Bust (0.7× prices) | $10,000 | ~0.2%/round |
-| Inner Belt | Normal (1.0× prices) | $8,000 | ~0.3%/round |
-| Core Belt | Boom (1.4× prices) | $6,000 | ~0.4%/round |
-
-**Important**: 
-- **Preliminary rounds** use only Outer Rim and Inner Belt (no boom) — similar to training data
-- **Finals** include all three sectors, with boom appearing frequently
-- Risk-free rate varies slightly each round within the sector's range
-- Mineral prices and economic phase are constant within each group run
 
 ## How You Win
 
