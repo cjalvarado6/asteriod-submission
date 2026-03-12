@@ -47,11 +47,10 @@ def price_asteroids(asteroids: list[dict], capital: float, round_info: dict) -> 
 
 The `round_info` dict contains:
 | Key | Description |
-|-----|-------------|
+|-----|-----------|
 | `round_number` | Current round (1-indexed) |
 | `total_rounds` | Total rounds in this sector |
 | `sector_name` | Name of the current sector |
-| `economic_cycle_phase` | `"bust"`, `"normal"`, or `"boom"` |
 | `asteroids_this_round` | Number of asteroids offered this round |
 | `risk_free_rate` | Per-round interest rate on liquid capital |
 | `num_active_competitors` | Number of non-bankrupt competitors |
@@ -59,6 +58,8 @@ The `round_info` dict contains:
 | `num_pending_extractions` | Number of extractions still in progress |
 | `previous_round` | List of per-asteroid results from last round (see below), or `None` for round 1 |
 | `market_history` | Cumulative market stats (see below), or `None` for round 1 |
+
+**Note**: The economic cycle (bust/normal/boom) is available via the `economic_cycle_indicator` feature in each asteroid's feature dict (0.7 = bust, 1.0 = normal, 1.4 = boom). This is consistent for all asteroids in a round.
 
 **Previous round results** (`previous_round`): A list with one entry per asteroid from the previous round:
 | Key | Description |
@@ -84,46 +85,33 @@ Each asteroid comes with a rich feature set covering geological properties, orbi
 
 ### Catastrophic Events
 A fraction of asteroids will trigger catastrophic events when mined. The rate is feature-driven — asteroids with low structural integrity, low density, high porosity, or high volatile content are significantly more dangerous:
-- **Void Rock**: Hollow shell. You lose your bid plus a cleanup penalty.
-- **Structural Collapse**: Drilling destabilizes the body. Bid lost plus penalty.
-- **Toxic Outgassing**: Releases toxic gases that damage all operations in the same geological cluster — yours and others'.
-
-Winning multiple asteroids in the same cluster increases both the probability of catastrophe and your exposure to cascade events.
+- **Void Rock**: Hollow shell. Penalty: $100.
+- **Structural Collapse**: Drilling destabilizes the body. Penalty: $200.
+- **Toxic Outgassing**: Releases toxic gases. Penalty: $300 + $10 per other asteroid in the same cluster. Toxic outgassing in one asteroid ruins operations for all asteroids in the same cluster, preventing extraction.
 
 ### Extraction Operations
-- **Extraction yield**: Not all mineral value is recovered during operations. Operational conditions — equipment compatibility, survey data quality, surface environment — all affect recovery rates. Your revenue from an asteroid is `mineral_value × extraction_yield`. The training data includes `extraction_yield` for each asteroid so you can learn what drives it.
-- **Extraction delay**: When you win, your bid is paid immediately. Revenue arrives after a variable delay that depends on the asteroid's characteristics (difficulty, location, accessibility, size). The training data includes `extraction_delay` for each asteroid.
+- **Extraction yield**: Not all mineral value is recovered during operations. Operational conditions — equipment compatibility, survey data quality, surface environment — all affect recovery rates. Your revenue from an asteroid is `mineral_value × extraction_yield`.
+- **Extraction delay**: When you win, your bid is paid immediately. Revenue arrives after a variable delay that depends on the asteroid's characteristics (difficulty, location, accessibility, size).
 - **Interest**: Liquid capital earns a per-round return (given in `round_info`).
 - **Bankruptcy**: If your capital hits zero, you're eliminated. No coming back.
 
-### Tournament Structure
-
-The competition runs across three sectors with elimination:
-
-| Sector | Rounds | Asteroids/Round | Capital | Market | Advance |
-|--------|--------|-----------------|---------|--------|---------|
-| **Outer Rim** | 50 | 10 | $10,000 | Bust | Top 50% |
-| **Inner Belt** | 50 | 10 | $8,000 | Normal | Top 40% |
-| **Core Belt** | 100 | 10 | $6,000 | Boom | Final rank |
-
-Each sector resets capital. Economic conditions change between sectors.
-
----
 
 ## Getting Started
 
 ### What You Have
-- `data/training.csv` — 10,000 asteroids with ~95 features and target values
+- `data/training.parquet` — 10,000 asteroids with ~95 features and target values
 - `DATA_DICTIONARY.md` — description of every feature
 - `strategies/example_strategy.py` — a simple baseline bidder to study
 
 ### Build Your Model
-Load the training data and explore. The training data includes target variables not available during competition: `mineral_value` (what's in the rock), `extraction_yield` (recovery fraction), `extraction_delay` (rounds until revenue), and `recovered_value` (what the winner actually receives: `mineral_value × extraction_yield`). Your goal is to estimate what asteroids are worth and how long extraction will take, then bid profitably.
+Load the training data and explore. The training data includes target variables not available during competition: `mineral_value` (what's in the rock), `extraction_yield` (recovery fraction), `extraction_delay` (rounds until revenue), `catastrophe_type` (multiclass: none/void_rock/structural_collapse/toxic_outgassing), and `toxic_outgassing_impact` (whether this asteroid was damaged by another's outgassing).
+
+**Important**: Rows with catastrophes or toxic outgassing impacts have zeroed `mineral_value` and `extraction_yield`.
 
 ```python
 import pandas as pd
 
-df = pd.read_csv("data/training.csv")
+df = pd.read_parquet("data/training.parquet")
 print(df.shape)          # (10000, 97)
 print(df.describe())     # summary statistics
 ```
@@ -147,10 +135,68 @@ See `SUBMISSION_GUIDE.md` for detailed submission instructions, rules, and const
 
 ---
 
-## Dependencies
+## Using AI Tools
 
-Players can use any Python packages in their strategy files. We recommend:
-- `numpy`, `pandas` for data analysis
-- `scikit-learn` for modeling
+We encourage participants to use AI assistants (ChatGPT, Claude, Copilot, etc.) for:
+- **Understanding** the problem, data, and domain
+- **Ideating** on modeling approaches and strategies
+- **Coding** your solution
 
-These are listed in `pyproject.toml`. Install with `uv sync` or `pip install -e .`
+This competition is about building the best asteroid valuation strategy — use whatever tools help you get there.
+
+---
+
+## Environment Setup
+
+### Option 1: Conda (Recommended)
+
+Create the competition environment with all allowed packages:
+
+```bash
+conda env create -f environment.yml
+conda activate asteroid-competition
+```
+
+### Option 2: pip
+
+Install core dependencies:
+```bash
+pip install -e .
+```
+
+Install with ML packages (XGBoost, LightGBM, CatBoost, statsmodels):
+```bash
+pip install -e ".[ml]"
+```
+
+Install with PyTorch:
+```bash
+pip install -e ".[torch]"
+```
+
+Install everything:
+```bash
+pip install -e ".[all]"
+```
+
+## Allowed Packages
+
+Your strategy can use these packages during competition. **Versions are pinned exactly** — using different versions may cause model loading failures (pickle/joblib compatibility).
+
+| Package | Version | Use Case |
+|---------|---------|----------|
+| **numpy** | 1.26.4 | Array operations |
+| **pandas** | 2.2.0 | Data manipulation |
+| **pyarrow** | 15.0.0 | Parquet file support |
+| **scipy** | 1.12.0 | Scientific computing |
+| **scikit-learn** | 1.4.0 | ML models, preprocessing |
+| **xgboost** | 2.0.3 | Gradient boosting |
+| **lightgbm** | 4.3.0 | Gradient boosting |
+| **catboost** | 1.2.2 | Gradient boosting |
+| **statsmodels** | 0.14.1 | Statistical models |
+| **torch** | 2.2.0 (CPU) | Neural networks |
+| **joblib** | 1.3.2 | Model serialization |
+
+⚠️ **Important**: Train your models using these exact versions. Models saved with different library versions may fail to load in the competition sandbox.
+
+Other imports may fail in the competition sandbox.

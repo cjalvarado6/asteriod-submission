@@ -1,8 +1,10 @@
 # Data Dictionary
 
-Feature reference for the Asteroid Auction Challenge training dataset. Each row represents one asteroid with ~95 measurement features and four target variables available only in training data (`mineral_value`, `extraction_yield`, `extraction_delay`, `recovered_value`).
+Feature reference for the Asteroid Auction Challenge training dataset. Each row represents one asteroid with ~95 measurement features and target variables available only in training data.
 
-Market conditions and data collection methods may differ between the training dataset and live competition sectors.
+**Important**: Market conditions and data collection methods may differ between the training dataset and live competition sectors. The training data spans multiple time periods to help you assess model generalization.
+
+**Data Format**: Training data is provided as a Parquet file (`training.parquet`) with explicit column types. The types listed below match exactly what your strategy will receive during competition.
 
 ---
 
@@ -10,33 +12,33 @@ Market conditions and data collection methods may differ between the training da
 
 Measured by remote sensing and, where available, surface probe data.
 
-| Feature | Description |
-|---------|-------------|
-| `mass` | Estimated mass in kilotonnes. |
-| `density` | Bulk density in g/cm3. Ranges from porous rubble piles (~1.5) to solid metal bodies (~8.0). |
-| `porosity` | Fraction of volume that is void space. High porosity combined with low density may indicate rubble pile structure. |
-| `spectral_class` | Tholen taxonomy classification (categorical: `C-type`, `S-type`, `M-type`, `X-type`). Each class reflects a different parent body differentiation history: C-types are primitive carbonaceous bodies, S-types are silicate-rich from partially differentiated parents, M-types are metallic fragments of differentiated cores, and X-types have ambiguous spectra. |
-| `mineral_signature_iron` | Spectroscopic concentration estimate for iron (Fe), scaled 0-1. |
-| `mineral_signature_nickel` | Spectroscopic concentration estimate for nickel (Ni), scaled 0-1. |
-| `mineral_signature_cobalt` | Spectroscopic concentration estimate for cobalt (Co), scaled 0-1. |
-| `mineral_signature_platinum` | Spectroscopic concentration estimate for platinum group metals (PGM), scaled 0-1. |
-| `mineral_signature_rare_earth` | Spectroscopic concentration estimate for rare earth elements (REE), scaled 0-1. |
-| `albedo` | Surface reflectivity measured via photometry. Related to surface composition and weathering. |
-| `rotation_period` | Sidereal rotation period in hours. Fast rotators may complicate surface operations. |
-| `surface_roughness` | Terrain roughness index (0=smooth, 1=extremely rough). Affects landing and drill placement. |
-| `magnetic_field_strength` | Measured magnetic field intensity in arbitrary units. Most asteroids have negligible fields. |
-| `thermal_inertia` | Thermal inertia in SI units. Indicates surface heat response characteristics. Extreme values in either direction can affect mining equipment performance. |
-| `shape_elongation` | Ratio of longest to shortest axis (1.0=spherical, 3.0+=highly elongated). Highly elongated bodies may indicate weak internal structure. |
-| `regolith_depth` | Estimated depth of surface regolith layer in meters. Deep regolith can complicate surface anchoring and extraction operations. |
-| `water_ice_fraction` | Detected fraction of water ice (0-1). Many asteroids have zero water ice. Water ice preservation depends on heliocentric distance and surface exposure. |
-| `volatile_content` | Fraction of volatile compounds detected. Includes ices and trapped gases. |
-| `structural_integrity` | Engineering assessment of structural soundness (0=critically fractured, 1=solid monolith). Low-integrity bodies carry elevated operational risk. |
-| `estimated_volume` | Derived: mass / density. |
-| `surface_gravity` | Derived surface gravitational acceleration. |
-| `escape_velocity` | Derived escape velocity from the surface. |
-| `composition_heterogeneity` | Compositional variability across the body (0=uniform, 1=highly mixed). |
-| `subsurface_anomaly_score` | Radar-derived score indicating subsurface structural anomalies. |
-| `crystalline_fraction` | Fraction of mineral content in crystalline vs amorphous form. |
+| Feature | Type | Description |
+|---------|------|-------------|
+| `mass` | float64 | Estimated mass in kilotonnes. |
+| `density` | float64 | Bulk density in g/cm3. Ranges from porous rubble piles (~1.5) to solid metal bodies (~8.0). |
+| `porosity` | float64 | Fraction of volume that is void space. High porosity combined with low density may indicate rubble pile structure. |
+| `spectral_class` | str | Tholen taxonomy classification. Values: `"C-type"`, `"S-type"`, `"M-type"`, `"X-type"`. |
+| `mineral_signature_iron` | float64 | Spectroscopic concentration estimate for iron (Fe), scaled 0-1. |
+| `mineral_signature_nickel` | float64 | Spectroscopic concentration estimate for nickel (Ni), scaled 0-1. |
+| `mineral_signature_cobalt` | float64 | Spectroscopic concentration estimate for cobalt (Co), scaled 0-1. |
+| `mineral_signature_platinum` | float64 | Spectroscopic concentration estimate for platinum group metals (PGM), scaled 0-1. |
+| `mineral_signature_rare_earth` | float64 | Spectroscopic concentration estimate for rare earth elements (REE), scaled 0-1. |
+| `albedo` | float64 | Surface reflectivity measured via photometry. Related to surface composition and weathering. |
+| `rotation_period` | float64 | Sidereal rotation period in hours. Fast rotators may complicate surface operations. |
+| `surface_roughness` | float64 | Terrain roughness index (0=smooth, 1=extremely rough). Affects landing and drill placement. |
+| `magnetic_field_strength` | float64 | Measured magnetic field intensity in arbitrary units. Most asteroids have negligible fields. |
+| `thermal_inertia` | float64 | Thermal inertia in SI units. Indicates surface heat response characteristics. |
+| `shape_elongation` | float64 | Ratio of longest to shortest axis (1.0=spherical, 3.0+=highly elongated). |
+| `regolith_depth` | float64 | Estimated depth of surface regolith layer in meters. |
+| `water_ice_fraction` | float64 | Detected fraction of water ice (0-1). Many asteroids have zero water ice. |
+| `volatile_content` | float64 | Fraction of volatile compounds detected. Includes ices and trapped gases. |
+| `structural_integrity` | float64 | Engineering assessment of structural soundness (0=critically fractured, 1=solid monolith). |
+| `estimated_volume` | float64 | Derived: mass / density. |
+| `surface_gravity` | float64 | Derived surface gravitational acceleration. |
+| `escape_velocity` | float64 | Derived escape velocity from the surface. |
+| `composition_heterogeneity` | float64 | Compositional variability across the body (0=uniform, 1=highly mixed). *Uniform composition can simplify extraction planning.* |
+| `subsurface_anomaly_score` | float64 | Radar-derived score indicating subsurface structural anomalies. *Anomalies may indicate valuable deposits or hidden risks.* |
+| `crystalline_fraction` | float64 | Fraction of mineral content in crystalline vs amorphous form. *Higher crystalline content may indicate more extractable ore.* |
 
 ---
 
@@ -44,24 +46,24 @@ Measured by remote sensing and, where available, surface probe data.
 
 Derived from ephemeris data and belt surveys.
 
-| Feature | Description |
-|---------|-------------|
-| `semi_major_axis` | Orbital semi-major axis in AU. |
-| `eccentricity` | Orbital eccentricity. Most belt asteroids have near-circular orbits. |
-| `inclination` | Orbital inclination in degrees relative to the ecliptic. |
-| `delta_v` | Required velocity change (km/s) to reach the asteroid from the nearest transfer point. Reflects fuel expenditure for transport. |
-| `belt_region` | Categorical belt position (`inner`, `main`, `outer`). |
-| `cluster_id` | Geological cluster assignment. Asteroids in the same cluster share a common formation history. |
-| `orbital_period` | Orbital period in years (derived from semi-major axis). |
-| `perihelion_distance` | Closest approach to the Sun in AU. |
-| `aphelion_distance` | Farthest distance from the Sun in AU. |
-| `transfer_window_frequency` | How often optimal transfer windows occur (higher=more frequent). |
-| `nearest_station_distance` | Distance to the nearest logistics station in AU. |
-| `piracy_proximity_index` | Proximity to known piracy corridors. Higher values indicate greater security cost. |
-| `communication_delay` | One-way light-time communication delay in minutes. |
-| `orbital_stability_score` | Long-term orbital stability assessment (0=unstable, 1=highly stable). |
-| `conjunction_frequency` | Rate of close approaches with other bodies (scaled). |
-| `lucky_number` | Numerological favorability score (0-10) derived from orbital resonance patterns, per the Ceres Institute for Astroprospecting (2246). |
+| Feature | Type | Description |
+|---------|------|-------------|
+| `semi_major_axis` | float64 | Orbital semi-major axis in AU. |
+| `eccentricity` | float64 | Orbital eccentricity. Most belt asteroids have near-circular orbits. |
+| `inclination` | float64 | Orbital inclination in degrees relative to the ecliptic. |
+| `delta_v` | float64 | Required velocity change (km/s) to reach the asteroid from the nearest transfer point. |
+| `belt_region` | str | Categorical belt position. Values: `"inner"`, `"main"`, `"outer"`. |
+| `cluster_id` | int64 | Geological cluster assignment. Asteroids in the same cluster share a common formation history. |
+| `orbital_period` | float64 | Orbital period in years (derived from semi-major axis). |
+| `perihelion_distance` | float64 | Closest approach to the Sun in AU. |
+| `aphelion_distance` | float64 | Farthest distance from the Sun in AU. |
+| `transfer_window_frequency` | float64 | How often optimal transfer windows occur (higher=more frequent). |
+| `nearest_station_distance` | float64 | Distance to the nearest logistics station in AU. |
+| `piracy_proximity_index` | float64 | Proximity to known piracy corridors. Higher values indicate greater security cost. |
+| `communication_delay` | float64 | One-way light-time communication delay in minutes. |
+| `orbital_stability_score` | float64 | Long-term orbital stability assessment (0=unstable, 1=highly stable). |
+| `conjunction_frequency` | float64 | Rate of close approaches with other bodies (scaled). |
+| `lucky_number` | float64 | Numerological favorability score (0-10). *Derived from orbital resonance patterns.* |
 
 ---
 
@@ -69,30 +71,31 @@ Derived from ephemeris data and belt surveys.
 
 Compiled from prospecting missions. Survey methodology and timing vary.
 
-| Feature | Description |
-|---------|-------------|
-| `survey_confidence` | Overall confidence rating of the survey data (0-1). Low values indicate the survey team had limited confidence in the measurements collected. |
-| `probe_type` | Survey probe deployed (categorical: `passive`, `active_flyby`, `landing`, `drill_core`). Higher-grade probes generally yield more reliable data. |
-| `surveyor_reputation` | Reputation score of the surveying firm (0-1). |
-| `num_surveys` | Number of independent survey missions conducted. |
-| `conflicting_results` | Binary flag (0 or 1). Set to 1 if independent surveys produced contradictory findings. |
-| `extraction_difficulty` | Engineering assessment of extraction difficulty (0=trivial, 1=extremely difficult). |
-| `accessibility_score` | How accessible deposits are to current drilling technology (0=inaccessible, 1=fully accessible). |
-| `survey_age_years` | Time since the most recent survey in years. |
-| `data_completeness` | Fraction of standard survey measurements successfully collected (0-1). Complete data enables better operational planning. |
-| `spectral_resolution` | Resolution quality of the spectroscopic instruments used (0-1). |
-| `ground_truth_samples` | Number of physical samples returned for laboratory analysis. |
-| `estimated_extraction_cost` | Surveyor's estimate of total extraction cost in thousands of credits. |
-| `drilling_feasibility` | Engineering assessment of drilling viability (0=infeasible, 1=ideal). |
-| `equipment_compatibility` | Compatibility score with standard mining equipment (0-1). Low compatibility can significantly impact operational recovery rates. |
-| `estimated_yield_tonnes` | Surveyor's estimate of extractable material in tonnes. |
-| `survey_anomaly_flag` | Binary flag. Set to 1 if the survey team flagged unusual readings. |
-| `previous_claim_history` | Number of times this asteroid has been previously claimed and abandoned. |
-| `legal_encumbrance_score` | Degree of legal complications (0=clear, higher=more encumbered). |
-| `environmental_hazard_rating` | Environmental risk assessment (0=benign, 1=severe). |
-| `insurance_risk_class` | Insurance underwriter risk classification (integer, 1=lowest risk, 5=highest risk). |
-| `ai_valuation_estimate` | Automated valuation from the ValuCorp v2.3 pricing model, trained on historical auction data. Released 2246; not yet validated over a full market cycle. |
-| `analyst_consensus_estimate` | Median valuation from a panel of 8 independent mining analysts. |
+| Feature | Type | Description |
+|---------|------|-------------|
+| `survey_confidence` | float64 | Overall confidence rating of the survey data (0-1). |
+| `probe_type` | str | Survey probe deployed. Values: `"passive"`, `"active_flyby"`, `"landing"`, `"drill_core"`. |
+| `surveyor_reputation` | float64 | Reputation score of the surveying firm (0-1). *Reputation scores are self-reported and updated annually.* |
+| `num_surveys` | int64 | Number of independent survey missions conducted. |
+| `conflicting_results` | int64 | Binary flag (0 or 1). Set to 1 if surveys produced contradictory findings. |
+| `extraction_difficulty` | float64 | Engineering assessment of extraction difficulty (0=trivial, 1=extremely difficult). |
+| `accessibility_score` | float64 | How accessible deposits are to current drilling technology (0-1). |
+| `survey_age_years` | float64 | Time since the most recent survey in years. |
+| `data_completeness` | float64 | Fraction of standard survey measurements successfully collected (0-1). |
+| `spectral_resolution` | float64 | Resolution quality of the spectroscopic instruments used (0-1). |
+| `ground_truth_samples` | int64 | Number of physical samples returned for laboratory analysis. |
+| `estimated_extraction_cost` | float64 | Surveyor's estimate of total extraction cost in thousands of credits. *Estimates assume standard equipment configurations.* |
+| `drilling_feasibility` | float64 | Engineering assessment of drilling viability (0=infeasible, 1=ideal). *Based on current drilling technology standards.* |
+| `equipment_compatibility` | float64 | Compatibility score with standard mining equipment (0-1). |
+| `estimated_yield_tonnes` | float64 | Surveyor's estimate of extractable material in tonnes. |
+| `survey_anomaly_flag` | int64 | Binary flag. Set to 1 if the survey team flagged unusual readings. |
+| `dual_phase_extraction` | int64 | Binary flag. Set to 1 if asteroid requires two-phase extraction. *Determined during survey based on detected ore composition.* |
+| `previous_claim_history` | int64 | Number of times this asteroid has been previously claimed and abandoned. |
+| `legal_encumbrance_score` | float64 | Degree of legal complications (0=clear, higher=more encumbered). |
+| `environmental_hazard_rating` | float64 | Environmental risk assessment (0=benign, 1=severe). |
+| `insurance_risk_class` | int64 | Insurance underwriter risk classification (1=lowest risk, 5=highest risk). |
+| `ai_valuation_estimate` | float64 | Automated valuation from ValuCorp v2.3. *Use with caution.* |
+| `analyst_consensus_estimate` | float64 | Median valuation from independent mining analysts. *Recent investigations have raised questions about analyst independence.* |
 
 ---
 
@@ -100,30 +103,30 @@ Compiled from prospecting missions. Survey methodology and timing vary.
 
 Snapshot of market conditions at the time of auction. Prices reflect current spot rates.
 
-| Feature | Description |
-|---------|-------------|
-| `mineral_price_iron` | Current spot price for iron per unit. |
-| `mineral_price_nickel` | Current spot price for nickel per unit. |
-| `mineral_price_cobalt` | Current spot price for cobalt per unit. |
-| `mineral_price_platinum` | Current spot price for platinum group metals per unit. |
-| `mineral_price_rare_earth` | Current spot price for rare earth elements per unit. |
-| `mineral_price_water` | Current spot price for water ice per unit. |
-| `fuel_cost_per_unit` | Current fuel cost for transport vessels. |
-| `insurance_rate` | Current insurance premium rate for mining operations. |
-| `tax_rate` | Applicable extraction tax rate for this claim's jurisdiction. |
-| `economic_cycle_indicator` | Macro-economic cycle position. Values below 1.0 indicate contraction; above 1.0 indicates expansion. |
-| `market_volatility_index` | Current market volatility measure. Higher values indicate more uncertain price environments. |
-| `demand_backlog_months` | Months of unfilled demand orders in the minerals market. |
-| `shipping_congestion_factor` | Shipping lane congestion level (0=clear, 1=severely congested). |
-| `refinery_capacity_utilization` | Fraction of system-wide refinery capacity in use. |
-| `spot_vs_contract_spread` | Spread between spot and long-term contract prices. |
-| `credit_availability_index` | Availability of financing (0=tight, 1=abundant). |
-| `competitor_activity_level` | Estimated activity level of other mining operations in the region. |
-| `regulatory_burden_score` | Regulatory overhead for operations in this jurisdiction. |
-| `supply_chain_disruption_risk` | Assessed risk of supply chain disruptions. |
-| `technology_readiness_level` | Technology readiness level of available equipment (scale 5-9). |
-| `media_hype_score` | Composite media attention index from mining industry newswires (0-10+). Reflects public and media interest in the claim. |
-| `social_sentiment_score` | Aggregated sentiment from mining industry social feeds. Normalized to zero mean. |
+| Feature | Type | Description |
+|---------|------|-------------|
+| `mineral_price_iron` | float64 | Current spot price for iron per unit. |
+| `mineral_price_nickel` | float64 | Current spot price for nickel per unit. |
+| `mineral_price_cobalt` | float64 | Current spot price for cobalt per unit. |
+| `mineral_price_platinum` | float64 | Current spot price for platinum group metals per unit. |
+| `mineral_price_rare_earth` | float64 | Current spot price for rare earth elements per unit. |
+| `mineral_price_water` | float64 | Current spot price for water ice per unit. |
+| `fuel_cost_per_unit` | float64 | Current fuel cost for transport vessels. |
+| `insurance_rate` | float64 | Current insurance premium rate for mining operations. |
+| `tax_rate` | float64 | Applicable extraction tax rate for this claim's jurisdiction. |
+| `economic_cycle_indicator` | float64 | Macro-economic cycle position (below 1.0=contraction, above 1.0=expansion). |
+| `market_volatility_index` | float64 | Current market volatility measure. |
+| `demand_backlog_months` | float64 | Months of unfilled demand orders in the minerals market. |
+| `shipping_congestion_factor` | float64 | Shipping lane congestion level (0=clear, 1=severely congested). |
+| `refinery_capacity_utilization` | float64 | Fraction of system-wide refinery capacity in use. |
+| `spot_vs_contract_spread` | float64 | Spread between spot and long-term contract prices. |
+| `credit_availability_index` | float64 | Availability of financing (0=tight, 1=abundant). |
+| `competitor_activity_level` | float64 | Estimated activity level of other mining operations in the region. |
+| `regulatory_burden_score` | float64 | Regulatory overhead for operations in this jurisdiction. |
+| `supply_chain_disruption_risk` | float64 | Assessed risk of supply chain disruptions. |
+| `technology_readiness_level` | float64 | Technology readiness level of available equipment (scale 5-9). |
+| `media_hype_score` | float64 | Composite media attention index (0-10+). *May not correlate with actual value.* |
+| `social_sentiment_score` | float64 | Aggregated sentiment from mining industry social feeds. *Notoriously noisy.* |
 
 ---
 
@@ -131,18 +134,18 @@ Snapshot of market conditions at the time of auction. Prices reflect current spo
 
 Local space environment near the asteroid.
 
-| Feature | Description |
-|---------|-------------|
-| `radiation_level` | Ambient radiation level in the asteroid's vicinity. Affects crew safety and equipment longevity. |
-| `micrometeorite_density` | Local micrometeorite flux density. |
-| `solar_flux` | Solar energy flux at the asteroid's location (relative to Earth=1.0). |
-| `infrastructure_proximity` | Proximity to existing mining infrastructure and logistics hubs (0=remote, 1=well-connected). |
-| `navigation_complexity` | Complexity of navigation in the local orbital environment. |
-| `rescue_response_time_hours` | Estimated emergency response time from nearest rescue facility. |
-| `local_jurisdiction_stability` | Political stability of the governing jurisdiction (0=unstable, 1=stable). |
-| `worker_availability_index` | Availability of qualified mining crews in the region. |
-| `power_grid_access` | Access to orbital power grid infrastructure. |
-| `debris_field_density` | Density of debris in the local orbital environment. |
+| Feature | Type | Description |
+|---------|------|-------------|
+| `radiation_level` | float64 | Ambient radiation level in the asteroid's vicinity. |
+| `micrometeorite_density` | float64 | Local micrometeorite flux density. |
+| `solar_flux` | float64 | Solar energy flux at the asteroid's location (relative to Earth=1.0). |
+| `infrastructure_proximity` | float64 | Proximity to existing mining infrastructure (0=remote, 1=well-connected). *Measured at time of survey; infrastructure expands over time.* |
+| `navigation_complexity` | float64 | Complexity of navigation in the local orbital environment. |
+| `rescue_response_time_hours` | float64 | Estimated emergency response time from nearest rescue facility. |
+| `local_jurisdiction_stability` | float64 | Political stability of the governing jurisdiction (0=unstable, 1=stable). |
+| `worker_availability_index` | float64 | Availability of qualified mining crews in the region. |
+| `power_grid_access` | float64 | Access to orbital power grid infrastructure. |
+| `debris_field_density` | float64 | Density of debris in the local orbital environment. |
 
 ---
 
@@ -150,12 +153,52 @@ Local space environment near the asteroid.
 
 Available in training data only. Not available during competition.
 
-| Feature | Description |
-|---------|-------------|
-| `mineral_value` | The total mineral content value of the asteroid — what's in the rock before extraction operations. This is the theoretical ceiling. |
-| `extraction_yield` | Operational recovery factor (0-1+). What fraction of the mineral value is actually recovered during extraction. Depends on operational conditions — equipment fit, survey quality, surface environment, and gravity. Values above 1.0 indicate better-than-expected recovery. |
-| `extraction_delay` | Extraction timeline in rounds. How many rounds until extraction revenue arrives after winning. Varies by asteroid characteristics — difficulty, belt region, accessibility, and mass all affect how long operations take. |
-| `recovered_value` | The actual revenue received after extraction: `mineral_value × extraction_yield`. This is what the winner takes home (before subtracting their bid). Negative values indicate a net loss. |
+| Feature | Type | Description |
+|---------|------|-------------|
+| `mineral_value` | float64 | Total mineral content value. **Set to 0 for catastrophe or impacted rows.** |
+| `extraction_yield` | float64 | Operational recovery factor (0-1+). **Set to 0 for catastrophe or impacted rows.** |
+| `extraction_delay` | int64 | Extraction timeline in rounds until revenue arrives. |
+| `catastrophe_type` | str | Catastrophe outcome. Values: `"none"`, `"void_rock"`, `"structural_collapse"`, `"toxic_outgassing"`. |
+| `toxic_outgassing_impact` | int64 | Binary (0 or 1). Set to 1 if impacted by toxic outgassing from another asteroid in the same cluster. |
+
+**Important**: Rows with `catastrophe_type != "none"` or `toxic_outgassing_impact == 1` have zeroed regression targets. When training models for `mineral_value` or `extraction_yield`, filter these rows. The catastrophe and impact columns allow you to learn the probability of these events from features.
+
+---
+
+## Metadata Columns
+
+| Feature | Type | Description |
+|---------|------|-------------|
+| `asteroid_id` | str | Unique identifier for each asteroid. |
+| `time_period` | str | Data collection period identifier (e.g., `"2045-Q1"`). **Do not use as a model feature.** |
+
+---
+
+## Catastrophe Risk Factors
+
+Catastrophe probability is driven by observable features. Key risk indicators:
+
+| Risk Factor | Description |
+|-------------|-------------|
+| **Structural Integrity** | Primary driver. Low integrity significantly increases risk. |
+| **Density** | Low density may suggest hollow structures prone to collapse. |
+| **Porosity** | High porosity combined with low density indicates fragile rubble pile structure. |
+| **Volatile Content** | High volatile content increases toxic outgassing risk. |
+| **Survey Confidence** | Low confidence means risks are harder to assess. |
+
+Catastrophe rates vary significantly based on feature combinations. Asteroids with multiple risk factors are considerably more dangerous than those with strong structural indicators
+
+## Catastrophe Penalties
+
+When a catastrophe occurs, you lose your bid plus a flat penalty per catastrophe type:
+
+| Catastrophe Type | Penalty |
+|------------------|---------|
+| **Void Rock** | $100 |
+| **Structural Collapse** | $200 |
+| **Toxic Outgassing** | $300 + $10 × (other asteroids in cluster) |
+
+**Toxic outgassing** is particularly dangerous: if ANY asteroid in a cluster experiences toxic outgassing, ALL other asteroids in that cluster have their extraction yield reduced to zero. This is reflected in the training data via the `toxic_outgassing_impact` column.
 
 ---
 
@@ -165,3 +208,4 @@ Available in training data only. Not available during competition.
 - Market conditions in the training data reflect one economic period. Competition sectors may differ.
 - Some features are derived from or correlated with others.
 - Asteroid valuation involves interacting factors. Simple univariate relationships may not capture the full picture.
+- The `economic_cycle_indicator` feature is consistent for all asteroids in a given round and reflects the current market regime (0.7 = bust, 1.0 = normal, 1.4 = boom).
