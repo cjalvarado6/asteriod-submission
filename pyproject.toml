@@ -38,3 +38,6 @@ dev = [
     "matplotlib",
     "seaborn",
 ]
+
+[tool.setuptools.packages.find]
+exclude = ["data*", "strategies*"]
